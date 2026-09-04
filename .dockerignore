@@ -1,0 +1,43 @@
+# Build artifacts
+target/
+build/
+*.class
+*.jar
+*.war
+
+# Git
+.git
+.gitignore
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.ipr
+*.iws
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+
+# Docker
+Dockerfile
+docker-compose.yml
+docker-compose*.yml
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Documentation
+README.md
+LICENSE
+docs/
+
+# Agent skills
+.agents/
+skills-lock.json
+
+# OS files
+.DS_Store
+Thumbs.db

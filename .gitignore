@@ -33,3 +33,11 @@ build/
 
 ### macOS ###
 .DS_Store
+
+### Windows ###
+Thumbs.db
+
+### Environment and secrets ###
+.env
+.env.*
+!.env.example
