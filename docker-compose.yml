@@ -1,6 +1,7 @@
 services:
   identity-service:
     build: .
+    image: identity-service-backend
     container_name: identity-service
     env_file: .env
     environment:
