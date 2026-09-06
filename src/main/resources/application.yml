@@ -23,6 +23,9 @@ spring:
     locations: classpath:db/migration
     validate-on-migrate: true
 
+  jooq:
+    sql-dialect: POSTGRES
+
   data:
     redis:
       host: ${REDIS_HOST:localhost}

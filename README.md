@@ -32,6 +32,35 @@ curl http://localhost:8080/health
 curl http://localhost:8080/health/db
 ```
 
+## Testing
+
+### Prerequisites
+
+* Docker must be running. Testcontainers starts isolated PostgreSQL 18 and Redis 8 containers automatically.
+
+### Commands
+
+```bash
+./mvnw clean compile
+./mvnw test
+./mvnw verify
+./mvnw verify -Dit.test=*IT
+```
+
+* `./mvnw clean compile` — Cleans build artifacts and compiles source code.
+* `./mvnw test` — Runs unit tests (`*Test.java`) through Surefire.
+* `./mvnw verify` — Runs unit and integration tests.
+* `./mvnw verify -Dit.test=*IT` — Runs integration tests (`*IT.java`) through Failsafe.
+
+Integration tests use Testcontainers to start isolated PostgreSQL 18 and Redis 8 containers and run Flyway migrations against a real PostgreSQL database. They do not depend on the external PostgreSQL or Redis instances used by local development.
+
+### Test Conventions
+
+* Unit tests: `*Test.java`
+* Integration tests: `*IT.java`
+* Integration tests use `AbstractIntegrationTest` as the shared Spring Boot test foundation.
+* Integration tests use `RANDOM_PORT`.
+
 ## Docker
 
 ### First Run / After Code Changes

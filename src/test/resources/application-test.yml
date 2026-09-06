@@ -1,0 +1,17 @@
+spring:
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    validate-on-migrate: true
+
+  jooq:
+    sql-dialect: POSTGRES
+
+server:
+  port: 0
+
+logging:
+  level:
+    com.identity: DEBUG
+    org.testcontainers: INFO
+    org.springframework: WARN
