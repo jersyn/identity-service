@@ -77,6 +77,20 @@ public class UsersRecord extends UpdatableRecordImpl<UsersRecord> {
         return (OffsetDateTime) get(3);
     }
 
+    /**
+     * Setter for <code>public.users.email</code>.
+     */
+    public void setEmail(String value) {
+        set(4, value);
+    }
+
+    /**
+     * Getter for <code>public.users.email</code>.
+     */
+    public String getEmail() {
+        return (String) get(4);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -100,13 +114,14 @@ public class UsersRecord extends UpdatableRecordImpl<UsersRecord> {
     /**
      * Create a detached, initialised UsersRecord
      */
-    public UsersRecord(UUID id, String status, OffsetDateTime createdAt, OffsetDateTime updatedAt) {
+    public UsersRecord(UUID id, String status, OffsetDateTime createdAt, OffsetDateTime updatedAt, String email) {
         super(Users.USERS);
 
         setId(id);
         setStatus(status);
         setCreatedAt(createdAt);
         setUpdatedAt(updatedAt);
+        setEmail(email);
         resetChangedOnNotNull();
     }
 }

@@ -8,15 +8,17 @@ public class User {
 
     private UUID id;
     private String status;
+    private String email;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
     public User() {
     }
 
-    public User(UUID id, String status, OffsetDateTime createdAt, OffsetDateTime updatedAt) {
+    public User(UUID id, String status, String email, OffsetDateTime createdAt, OffsetDateTime updatedAt) {
         this.id = id;
         this.status = status;
+        this.email = email;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -35,6 +37,14 @@ public class User {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public OffsetDateTime getCreatedAt() {
@@ -71,6 +81,7 @@ public class User {
         return "User{" +
             "id=" + id +
             ", status='" + status + '\'' +
+            ", email='" + email + '\'' +
             ", createdAt=" + createdAt +
             ", updatedAt=" + updatedAt +
             '}';

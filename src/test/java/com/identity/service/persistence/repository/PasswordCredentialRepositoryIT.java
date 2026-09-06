@@ -98,6 +98,7 @@ class PasswordCredentialRepositoryIT extends AbstractIntegrationTest {
 
     private User createUser() {
         User user = new User();
+        user.setEmail("cred-" + UUID.randomUUID() + "@example.com");
         user.setStatus("ACTIVE");
         return userRepository.create(user);
     }

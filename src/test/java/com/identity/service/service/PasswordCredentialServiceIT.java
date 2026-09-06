@@ -1,19 +1,18 @@
 package com.identity.service.service;
 
+import com.identity.service.AbstractIntegrationTest;
 import com.identity.service.domain.PasswordCredential;
 import com.identity.service.domain.User;
 import com.identity.service.persistence.repository.PasswordCredentialRepository;
 import com.identity.service.persistence.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-class PasswordCredentialServiceIT {
+class PasswordCredentialServiceIT extends AbstractIntegrationTest {
 
     @Autowired
     private PasswordCredentialService passwordCredentialService;
@@ -88,6 +87,7 @@ class PasswordCredentialServiceIT {
 
     private User createUser() {
         User user = new User();
+        user.setEmail("svc-" + UUID.randomUUID() + "@example.com");
         user.setStatus("ACTIVE");
         return userRepository.create(user);
     }

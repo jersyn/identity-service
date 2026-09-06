@@ -23,9 +23,15 @@ public class UserService {
         return userRepository.findById(id);
     }
 
+    @Transactional(readOnly = true)
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
     @Transactional
-    public User createUser(String status) {
+    public User createUser(String email, String status) {
         User user = new User();
+        user.setEmail(email);
         user.setStatus(status);
         return userRepository.create(user);
     }

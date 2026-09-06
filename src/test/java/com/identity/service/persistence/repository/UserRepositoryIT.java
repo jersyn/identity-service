@@ -18,12 +18,14 @@ class UserRepositoryIT extends AbstractIntegrationTest {
     @Test
     void createShouldPersistUser() {
         User user = new User();
+        user.setEmail("create@example.com");
         user.setStatus("ACTIVE");
 
         User created = userRepository.create(user);
 
         assertThat(created.getId()).isNotNull();
         assertThat(created.getStatus()).isEqualTo("ACTIVE");
+        assertThat(created.getEmail()).isEqualTo("create@example.com");
         assertThat(created.getCreatedAt()).isNotNull();
         assertThat(created.getUpdatedAt()).isNotNull();
     }
@@ -31,6 +33,7 @@ class UserRepositoryIT extends AbstractIntegrationTest {
     @Test
     void findByIdShouldReturnExistingUser() {
         User user = new User();
+        user.setEmail("findbyid@example.com");
         user.setStatus("ACTIVE");
         User created = userRepository.create(user);
 
@@ -39,6 +42,7 @@ class UserRepositoryIT extends AbstractIntegrationTest {
         assertThat(found).isPresent();
         assertThat(found.get().getId()).isEqualTo(created.getId());
         assertThat(found.get().getStatus()).isEqualTo("ACTIVE");
+        assertThat(found.get().getEmail()).isEqualTo("findbyid@example.com");
     }
 
     @Test
@@ -49,8 +53,30 @@ class UserRepositoryIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void findByEmailShouldReturnExistingUser() {
+        User user = new User();
+        user.setEmail("findbyemail@example.com");
+        user.setStatus("ACTIVE");
+        User created = userRepository.create(user);
+
+        Optional<User> found = userRepository.findByEmail("findbyemail@example.com");
+
+        assertThat(found).isPresent();
+        assertThat(found.get().getId()).isEqualTo(created.getId());
+        assertThat(found.get().getEmail()).isEqualTo("findbyemail@example.com");
+    }
+
+    @Test
+    void findByEmailShouldReturnEmptyForNonexistentEmail() {
+        Optional<User> found = userRepository.findByEmail("nobody@example.com");
+
+        assertThat(found).isEmpty();
+    }
+
+    @Test
     void updateShouldModifyUserStatus() {
         User user = new User();
+        user.setEmail("update@example.com");
         user.setStatus("ACTIVE");
         User created = userRepository.create(user);
 
@@ -59,15 +85,18 @@ class UserRepositoryIT extends AbstractIntegrationTest {
 
         assertThat(updated.getId()).isEqualTo(created.getId());
         assertThat(updated.getStatus()).isEqualTo("SUSPENDED");
+        assertThat(updated.getEmail()).isEqualTo("update@example.com");
     }
 
     @Test
     void createShouldGenerateUniqueIds() {
         User user1 = new User();
+        user1.setEmail("unique-a@example.com");
         user1.setStatus("ACTIVE");
         User created1 = userRepository.create(user1);
 
         User user2 = new User();
+        user2.setEmail("unique-b@example.com");
         user2.setStatus("ACTIVE");
         User created2 = userRepository.create(user2);
 

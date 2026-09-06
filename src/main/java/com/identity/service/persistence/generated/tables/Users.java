@@ -10,7 +10,9 @@ import com.identity.service.persistence.generated.tables.PasswordCredentials.Pas
 import com.identity.service.persistence.generated.tables.records.UsersRecord;
 
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import org.jooq.Condition;
@@ -75,6 +77,11 @@ public class Users extends TableImpl<UsersRecord> {
      * The column <code>public.users.updated_at</code>.
      */
     public final TableField<UsersRecord, OffsetDateTime> UPDATED_AT = createField(DSL.name("updated_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+
+    /**
+     * The column <code>public.users.email</code>.
+     */
+    public final TableField<UsersRecord, String> EMAIL = createField(DSL.name("email"), SQLDataType.VARCHAR(320).nullable(false), this, "");
 
     private Users(Name alias, Table<UsersRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -146,6 +153,11 @@ public class Users extends TableImpl<UsersRecord> {
     @Override
     public UniqueKey<UsersRecord> getPrimaryKey() {
         return Keys.USERS_PKEY;
+    }
+
+    @Override
+    public List<UniqueKey<UsersRecord>> getUniqueKeys() {
+        return Arrays.asList(Keys.UK_USERS_EMAIL);
     }
 
     private transient PasswordCredentialsPath _passwordCredentials;

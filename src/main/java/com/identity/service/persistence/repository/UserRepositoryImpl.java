@@ -27,9 +27,17 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public Optional<User> findByEmail(String email) {
+        return dsl.selectFrom(USERS)
+            .where(USERS.EMAIL.eq(email))
+            .fetchOptional(this::toDomain);
+    }
+
+    @Override
     public User create(User user) {
         UsersRecord record = dsl.newRecord(USERS);
         record.setStatus(user.getStatus());
+        record.setEmail(user.getEmail());
 
         record.store();
         record.refresh();
@@ -41,6 +49,7 @@ public class UserRepositoryImpl implements UserRepository {
     public User update(User user) {
         dsl.update(USERS)
             .set(USERS.STATUS, user.getStatus())
+            .set(USERS.EMAIL, user.getEmail())
             .set(USERS.UPDATED_AT, user.getUpdatedAt())
             .where(USERS.ID.eq(user.getId()))
             .execute();
@@ -54,6 +63,7 @@ public class UserRepositoryImpl implements UserRepository {
         return new User(
             record.getId(),
             record.getStatus(),
+            record.getEmail(),
             record.getCreatedAt(),
             record.getUpdatedAt()
         );

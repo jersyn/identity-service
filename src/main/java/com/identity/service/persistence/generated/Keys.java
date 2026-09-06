@@ -28,6 +28,7 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final UniqueKey<PasswordCredentialsRecord> PASSWORD_CREDENTIALS_PKEY = Internal.createUniqueKey(PasswordCredentials.PASSWORD_CREDENTIALS, DSL.name("password_credentials_pkey"), new TableField[] { PasswordCredentials.PASSWORD_CREDENTIALS.USER_ID }, true);
+    public static final UniqueKey<UsersRecord> UK_USERS_EMAIL = Internal.createUniqueKey(Users.USERS, DSL.name("uk_users_email"), new TableField[] { Users.USERS.EMAIL }, true);
     public static final UniqueKey<UsersRecord> USERS_PKEY = Internal.createUniqueKey(Users.USERS, DSL.name("users_pkey"), new TableField[] { Users.USERS.ID }, true);
 
     // -------------------------------------------------------------------------
