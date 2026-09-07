@@ -7,6 +7,7 @@
 ./mvnw test                   # unit tests (*Test.java) via Surefire
 ./mvnw verify                 # unit + integration tests
 ./mvnw verify -Dit.test=*IT   # integration tests only via Failsafe
+./mvnw spring-boot:run        # run locally
 ```
 
 **No lint/typecheck step exists.** `compile` is the fastest verification.
@@ -43,6 +44,7 @@ com.identity.service
 - All IT classes extend `AbstractIntegrationTest` which provides `@SpringBootTest(RANDOM_PORT)` + Testcontainers
 - Test profile: `@ActiveProfiles("test")`
 - External PostgreSQL/Redis are **not** used by tests — Testcontainers provides isolated containers.
+- Testcontainers uses `withReuse(true)` — requires `TESTCONTAINERS_REUSE_ENABLED=true` or `.testcontainers.properties`.
 
 ## Local Dev
 
@@ -54,5 +56,6 @@ com.identity.service
 ## Gotchas
 
 - jOOQ codegen requires the external PostgreSQL to be running. `generate-sources` phase will fail if it's down.
+- jOOQ codegen DB credentials are hardcoded in `pom.xml` — local dev only, do not change for tests.
 - The `token_families`, `refresh_tokens`, and `confidential_clients` tables exist in the migration but have **no jOOQ generated classes yet** (not in the `includes` filter).
 - Redis is a dependency but has no repository layer yet — only the connection config exists.
