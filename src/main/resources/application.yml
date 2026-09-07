@@ -26,6 +26,10 @@ jwt:
     private-key: ${JWT_SIGNING_PRIVATE_KEY}
     public-key: ${JWT_SIGNING_PUBLIC_KEY}
     kid: ${JWT_SIGNING_KID:identity-service-key-1}
+  access-token:
+    issuer: identity-service
+    audience: ${JWT_ACCESS_TOKEN_AUDIENCE}
+    lifetime: PT15M
 
 logging:
   level:
