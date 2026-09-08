@@ -23,7 +23,7 @@ class SecurityConfig {
             .formLogin(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(HttpMethod.GET, "/health", "/health/db").permitAll()
+                .requestMatchers(HttpMethod.GET, "/health", "/health/db", "/.well-known/jwks.json").permitAll()
                 .anyRequest().authenticated()
             );
         return http.build();
