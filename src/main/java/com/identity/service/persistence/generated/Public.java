@@ -5,6 +5,8 @@ package com.identity.service.persistence.generated;
 
 
 import com.identity.service.persistence.generated.tables.PasswordCredentials;
+import com.identity.service.persistence.generated.tables.RefreshTokens;
+import com.identity.service.persistence.generated.tables.TokenFamilies;
 import com.identity.service.persistence.generated.tables.Users;
 
 import java.util.Arrays;
@@ -34,6 +36,16 @@ public class Public extends SchemaImpl {
     public final PasswordCredentials PASSWORD_CREDENTIALS = PasswordCredentials.PASSWORD_CREDENTIALS;
 
     /**
+     * The table <code>public.refresh_tokens</code>.
+     */
+    public final RefreshTokens REFRESH_TOKENS = RefreshTokens.REFRESH_TOKENS;
+
+    /**
+     * The table <code>public.token_families</code>.
+     */
+    public final TokenFamilies TOKEN_FAMILIES = TokenFamilies.TOKEN_FAMILIES;
+
+    /**
      * The table <code>public.users</code>.
      */
     public final Users USERS = Users.USERS;
@@ -55,6 +67,8 @@ public class Public extends SchemaImpl {
     public final List<Table<?>> getTables() {
         return Arrays.asList(
             PasswordCredentials.PASSWORD_CREDENTIALS,
+            RefreshTokens.REFRESH_TOKENS,
+            TokenFamilies.TOKEN_FAMILIES,
             Users.USERS
         );
     }

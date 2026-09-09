@@ -5,8 +5,12 @@ package com.identity.service.persistence.generated;
 
 
 import com.identity.service.persistence.generated.tables.PasswordCredentials;
+import com.identity.service.persistence.generated.tables.RefreshTokens;
+import com.identity.service.persistence.generated.tables.TokenFamilies;
 import com.identity.service.persistence.generated.tables.Users;
 import com.identity.service.persistence.generated.tables.records.PasswordCredentialsRecord;
+import com.identity.service.persistence.generated.tables.records.RefreshTokensRecord;
+import com.identity.service.persistence.generated.tables.records.TokenFamiliesRecord;
 import com.identity.service.persistence.generated.tables.records.UsersRecord;
 
 import org.jooq.ForeignKey;
@@ -28,6 +32,8 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final UniqueKey<PasswordCredentialsRecord> PASSWORD_CREDENTIALS_PKEY = Internal.createUniqueKey(PasswordCredentials.PASSWORD_CREDENTIALS, DSL.name("password_credentials_pkey"), new TableField[] { PasswordCredentials.PASSWORD_CREDENTIALS.USER_ID }, true);
+    public static final UniqueKey<RefreshTokensRecord> REFRESH_TOKENS_PKEY = Internal.createUniqueKey(RefreshTokens.REFRESH_TOKENS, DSL.name("refresh_tokens_pkey"), new TableField[] { RefreshTokens.REFRESH_TOKENS.ID }, true);
+    public static final UniqueKey<TokenFamiliesRecord> TOKEN_FAMILIES_PKEY = Internal.createUniqueKey(TokenFamilies.TOKEN_FAMILIES, DSL.name("token_families_pkey"), new TableField[] { TokenFamilies.TOKEN_FAMILIES.ID }, true);
     public static final UniqueKey<UsersRecord> UK_USERS_EMAIL = Internal.createUniqueKey(Users.USERS, DSL.name("uk_users_email"), new TableField[] { Users.USERS.EMAIL }, true);
     public static final UniqueKey<UsersRecord> USERS_PKEY = Internal.createUniqueKey(Users.USERS, DSL.name("users_pkey"), new TableField[] { Users.USERS.ID }, true);
 
@@ -36,4 +42,6 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final ForeignKey<PasswordCredentialsRecord, UsersRecord> PASSWORD_CREDENTIALS__PASSWORD_CREDENTIALS_USER_ID_FKEY = Internal.createForeignKey(PasswordCredentials.PASSWORD_CREDENTIALS, DSL.name("password_credentials_user_id_fkey"), new TableField[] { PasswordCredentials.PASSWORD_CREDENTIALS.USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.ID }, true);
+    public static final ForeignKey<RefreshTokensRecord, TokenFamiliesRecord> REFRESH_TOKENS__REFRESH_TOKENS_TOKEN_FAMILY_ID_FKEY = Internal.createForeignKey(RefreshTokens.REFRESH_TOKENS, DSL.name("refresh_tokens_token_family_id_fkey"), new TableField[] { RefreshTokens.REFRESH_TOKENS.TOKEN_FAMILY_ID }, Keys.TOKEN_FAMILIES_PKEY, new TableField[] { TokenFamilies.TOKEN_FAMILIES.ID }, true);
+    public static final ForeignKey<TokenFamiliesRecord, UsersRecord> TOKEN_FAMILIES__TOKEN_FAMILIES_USER_ID_FKEY = Internal.createForeignKey(TokenFamilies.TOKEN_FAMILIES, DSL.name("token_families_user_id_fkey"), new TableField[] { TokenFamilies.TOKEN_FAMILIES.USER_ID }, Keys.USERS_PKEY, new TableField[] { Users.USERS.ID }, true);
 }

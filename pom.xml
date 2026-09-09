@@ -162,7 +162,7 @@
                     <generator>
                         <database>
                             <inputSchema>public</inputSchema>
-                            <includes>users|password_credentials</includes>
+                            <includes>users|password_credentials|token_families|refresh_tokens</includes>
                         </database>
                         <target>
                             <packageName>com.identity.service.persistence.generated</packageName>

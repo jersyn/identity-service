@@ -5,6 +5,8 @@ package com.identity.service.persistence.generated;
 
 
 import com.identity.service.persistence.generated.tables.PasswordCredentials;
+import com.identity.service.persistence.generated.tables.RefreshTokens;
+import com.identity.service.persistence.generated.tables.TokenFamilies;
 import com.identity.service.persistence.generated.tables.Users;
 
 
@@ -18,6 +20,16 @@ public class Tables {
      * The table <code>public.password_credentials</code>.
      */
     public static final PasswordCredentials PASSWORD_CREDENTIALS = PasswordCredentials.PASSWORD_CREDENTIALS;
+
+    /**
+     * The table <code>public.refresh_tokens</code>.
+     */
+    public static final RefreshTokens REFRESH_TOKENS = RefreshTokens.REFRESH_TOKENS;
+
+    /**
+     * The table <code>public.token_families</code>.
+     */
+    public static final TokenFamilies TOKEN_FAMILIES = TokenFamilies.TOKEN_FAMILIES;
 
     /**
      * The table <code>public.users</code>.

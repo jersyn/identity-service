@@ -7,6 +7,7 @@ package com.identity.service.persistence.generated.tables;
 import com.identity.service.persistence.generated.Keys;
 import com.identity.service.persistence.generated.Public;
 import com.identity.service.persistence.generated.tables.PasswordCredentials.PasswordCredentialsPath;
+import com.identity.service.persistence.generated.tables.TokenFamilies.TokenFamiliesPath;
 import com.identity.service.persistence.generated.tables.records.UsersRecord;
 
 import java.time.OffsetDateTime;
@@ -171,6 +172,19 @@ public class Users extends TableImpl<UsersRecord> {
             _passwordCredentials = new PasswordCredentialsPath(this, null, Keys.PASSWORD_CREDENTIALS__PASSWORD_CREDENTIALS_USER_ID_FKEY.getInverseKey());
 
         return _passwordCredentials;
+    }
+
+    private transient TokenFamiliesPath _tokenFamilies;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.token_families</code> table
+     */
+    public TokenFamiliesPath tokenFamilies() {
+        if (_tokenFamilies == null)
+            _tokenFamilies = new TokenFamiliesPath(this, null, Keys.TOKEN_FAMILIES__TOKEN_FAMILIES_USER_ID_FKEY.getInverseKey());
+
+        return _tokenFamilies;
     }
 
     @Override
