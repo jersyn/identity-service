@@ -24,6 +24,7 @@ class SecurityConfig {
             .httpBasic(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(HttpMethod.GET, "/health", "/health/db", "/.well-known/jwks.json").permitAll()
+                .requestMatchers(HttpMethod.POST, "/token").permitAll()
                 .anyRequest().authenticated()
             );
         return http.build();

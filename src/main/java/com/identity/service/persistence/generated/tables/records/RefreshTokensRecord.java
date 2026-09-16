@@ -91,6 +91,20 @@ public class RefreshTokensRecord extends UpdatableRecordImpl<RefreshTokensRecord
         return (OffsetDateTime) get(4);
     }
 
+    /**
+     * Setter for <code>public.refresh_tokens.token_hash</code>.
+     */
+    public void setTokenHash(byte[] value) {
+        set(5, value);
+    }
+
+    /**
+     * Getter for <code>public.refresh_tokens.token_hash</code>.
+     */
+    public byte[] getTokenHash() {
+        return (byte[]) get(5);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -114,7 +128,7 @@ public class RefreshTokensRecord extends UpdatableRecordImpl<RefreshTokensRecord
     /**
      * Create a detached, initialised RefreshTokensRecord
      */
-    public RefreshTokensRecord(UUID id, UUID tokenFamilyId, String status, OffsetDateTime expiresAt, OffsetDateTime usedAt) {
+    public RefreshTokensRecord(UUID id, UUID tokenFamilyId, String status, OffsetDateTime expiresAt, OffsetDateTime usedAt, byte[] tokenHash) {
         super(RefreshTokens.REFRESH_TOKENS);
 
         setId(id);
@@ -122,6 +136,7 @@ public class RefreshTokensRecord extends UpdatableRecordImpl<RefreshTokensRecord
         setStatus(status);
         setExpiresAt(expiresAt);
         setUsedAt(usedAt);
+        setTokenHash(tokenHash);
         resetChangedOnNotNull();
     }
 }

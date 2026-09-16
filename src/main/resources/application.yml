@@ -30,6 +30,8 @@ jwt:
     issuer: identity-service
     audience: ${JWT_ACCESS_TOKEN_AUDIENCE}
     lifetime: PT15M
+  refresh-token:
+    idle-timeout: PT720H
 
 logging:
   level:

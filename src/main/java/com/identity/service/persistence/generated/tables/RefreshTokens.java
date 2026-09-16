@@ -87,6 +87,11 @@ public class RefreshTokens extends TableImpl<RefreshTokensRecord> {
      */
     public final TableField<RefreshTokensRecord, OffsetDateTime> USED_AT = createField(DSL.name("used_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
+    /**
+     * The column <code>public.refresh_tokens.token_hash</code>.
+     */
+    public final TableField<RefreshTokensRecord, byte[]> TOKEN_HASH = createField(DSL.name("token_hash"), SQLDataType.BLOB.nullable(false), this, "");
+
     private RefreshTokens(Name alias, Table<RefreshTokensRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
@@ -156,7 +161,7 @@ public class RefreshTokens extends TableImpl<RefreshTokensRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.asList(Indexes.IDX_REFRESH_TOKENS_TOKEN_FAMILY_ID);
+        return Arrays.asList(Indexes.IDX_REFRESH_TOKENS_TOKEN_FAMILY_ID, Indexes.IDX_REFRESH_TOKENS_TOKEN_HASH);
     }
 
     @Override

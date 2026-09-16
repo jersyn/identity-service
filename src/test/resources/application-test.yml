@@ -19,6 +19,8 @@ jwt:
     issuer: identity-service-test
     audience: identity-service-test
     lifetime: PT15M
+  refresh-token:
+    idle-timeout: PT720H
 
 logging:
   level:

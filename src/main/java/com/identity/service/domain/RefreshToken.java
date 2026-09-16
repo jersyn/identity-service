@@ -11,16 +11,19 @@ public class RefreshToken {
     private String status;
     private OffsetDateTime expiresAt;
     private OffsetDateTime usedAt;
+    private byte[] tokenHash;
 
     public RefreshToken() {
     }
 
-    public RefreshToken(UUID id, UUID tokenFamilyId, String status, OffsetDateTime expiresAt, OffsetDateTime usedAt) {
+    public RefreshToken(UUID id, UUID tokenFamilyId, String status, OffsetDateTime expiresAt,
+                        OffsetDateTime usedAt, byte[] tokenHash) {
         this.id = id;
         this.tokenFamilyId = tokenFamilyId;
         this.status = status;
         this.expiresAt = expiresAt;
         this.usedAt = usedAt;
+        this.tokenHash = tokenHash;
     }
 
     public UUID getId() {
@@ -61,6 +64,14 @@ public class RefreshToken {
 
     public void setUsedAt(OffsetDateTime usedAt) {
         this.usedAt = usedAt;
+    }
+
+    public byte[] getTokenHash() {
+        return tokenHash;
+    }
+
+    public void setTokenHash(byte[] tokenHash) {
+        this.tokenHash = tokenHash;
     }
 
     @Override

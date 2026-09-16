@@ -9,5 +9,9 @@ public interface RefreshTokenRepository {
 
     Optional<RefreshToken> findById(UUID id);
 
+    Optional<RefreshToken> findByTokenHash(byte[] tokenHash);
+
     RefreshToken create(RefreshToken refreshToken);
+
+    int markAsUsed(UUID id);
 }

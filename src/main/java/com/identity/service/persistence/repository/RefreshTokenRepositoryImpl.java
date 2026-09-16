@@ -5,6 +5,7 @@ import com.identity.service.persistence.generated.tables.records.RefreshTokensRe
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,17 +28,37 @@ public class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
     }
 
     @Override
+    public Optional<RefreshToken> findByTokenHash(byte[] tokenHash) {
+        return dsl.selectFrom(REFRESH_TOKENS)
+            .where(REFRESH_TOKENS.TOKEN_HASH.eq(tokenHash))
+            .and(REFRESH_TOKENS.STATUS.eq("ACTIVE"))
+            .fetchOptional(this::toDomain);
+    }
+
+    @Override
     public RefreshToken create(RefreshToken refreshToken) {
         RefreshTokensRecord record = dsl.newRecord(REFRESH_TOKENS);
         record.setTokenFamilyId(refreshToken.getTokenFamilyId());
         record.setStatus(refreshToken.getStatus());
         record.setExpiresAt(refreshToken.getExpiresAt());
         record.setUsedAt(refreshToken.getUsedAt());
+        record.setTokenHash(refreshToken.getTokenHash());
 
         record.store();
         record.refresh();
 
         return toDomain(record);
+    }
+
+    @Override
+    public int markAsUsed(UUID id) {
+        return dsl.update(REFRESH_TOKENS)
+            .set(REFRESH_TOKENS.STATUS, "USED")
+            .set(REFRESH_TOKENS.USED_AT, OffsetDateTime.now())
+            .where(REFRESH_TOKENS.ID.eq(id))
+            .and(REFRESH_TOKENS.STATUS.eq("ACTIVE"))
+            .and(REFRESH_TOKENS.EXPIRES_AT.greaterThan(OffsetDateTime.now()))
+            .execute();
     }
 
     private RefreshToken toDomain(RefreshTokensRecord record) {
@@ -46,7 +67,8 @@ public class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
             record.getTokenFamilyId(),
             record.getStatus(),
             record.getExpiresAt(),
-            record.getUsedAt()
+            record.getUsedAt(),
+            record.getTokenHash()
         );
     }
 }

@@ -24,5 +24,6 @@ public class Indexes {
     // -------------------------------------------------------------------------
 
     public static final Index IDX_REFRESH_TOKENS_TOKEN_FAMILY_ID = Internal.createIndex(DSL.name("idx_refresh_tokens_token_family_id"), RefreshTokens.REFRESH_TOKENS, new OrderField[] { RefreshTokens.REFRESH_TOKENS.TOKEN_FAMILY_ID }, false);
+    public static final Index IDX_REFRESH_TOKENS_TOKEN_HASH = Internal.createIndex(DSL.name("idx_refresh_tokens_token_hash"), RefreshTokens.REFRESH_TOKENS, new OrderField[] { RefreshTokens.REFRESH_TOKENS.TOKEN_HASH }, true);
     public static final Index IDX_TOKEN_FAMILIES_USER_ID = Internal.createIndex(DSL.name("idx_token_families_user_id"), TokenFamilies.TOKEN_FAMILIES, new OrderField[] { TokenFamilies.TOKEN_FAMILIES.USER_ID }, false);
 }

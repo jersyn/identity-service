@@ -7,6 +7,8 @@ import com.identity.service.domain.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,6 +34,7 @@ class RefreshTokenRepositoryIT extends AbstractIntegrationTest {
         refreshToken.setTokenFamilyId(tokenFamily.getId());
         refreshToken.setStatus("ACTIVE");
         refreshToken.setExpiresAt(OffsetDateTime.now().plusHours(1));
+        refreshToken.setTokenHash(randomHash());
 
         RefreshToken created = refreshTokenRepository.create(refreshToken);
 
@@ -40,6 +43,7 @@ class RefreshTokenRepositoryIT extends AbstractIntegrationTest {
         assertThat(created.getStatus()).isEqualTo("ACTIVE");
         assertThat(created.getExpiresAt()).isNotNull();
         assertThat(created.getUsedAt()).isNull();
+        assertThat(created.getTokenHash()).isNotNull();
     }
 
     @Test
@@ -71,6 +75,7 @@ class RefreshTokenRepositoryIT extends AbstractIntegrationTest {
         refreshToken.setStatus("USED");
         refreshToken.setExpiresAt(OffsetDateTime.now().plusHours(1));
         refreshToken.setUsedAt(OffsetDateTime.now());
+        refreshToken.setTokenHash(randomHash());
 
         RefreshToken created = refreshTokenRepository.create(refreshToken);
 
@@ -86,6 +91,7 @@ class RefreshTokenRepositoryIT extends AbstractIntegrationTest {
         refreshToken.setTokenFamilyId(tokenFamily.getId());
         refreshToken.setStatus("REVOKED");
         refreshToken.setExpiresAt(OffsetDateTime.now().plusHours(1));
+        refreshToken.setTokenHash(randomHash());
 
         RefreshToken created = refreshTokenRepository.create(refreshToken);
 
@@ -101,6 +107,7 @@ class RefreshTokenRepositoryIT extends AbstractIntegrationTest {
         refreshToken.setTokenFamilyId(tokenFamily.getId());
         refreshToken.setStatus("ACTIVE");
         refreshToken.setExpiresAt(expiresAt);
+        refreshToken.setTokenHash(randomHash());
 
         RefreshToken created = refreshTokenRepository.create(refreshToken);
 
@@ -127,6 +134,64 @@ class RefreshTokenRepositoryIT extends AbstractIntegrationTest {
         assertThat(token2.getTokenFamilyId()).isEqualTo(tokenFamily.getId());
     }
 
+    @Test
+    void findByTokenHashShouldReturnExistingToken() {
+        TokenFamily tokenFamily = createTokenFamily();
+        byte[] hash = randomHash();
+        RefreshToken token = createRefreshTokenWithHash(tokenFamily.getId(), "ACTIVE", hash);
+
+        Optional<RefreshToken> found = refreshTokenRepository.findByTokenHash(hash);
+
+        assertThat(found).isPresent();
+        assertThat(found.get().getId()).isEqualTo(token.getId());
+    }
+
+    @Test
+    void findByTokenHashShouldReturnEmptyForNonexistentHash() {
+        Optional<RefreshToken> found = refreshTokenRepository.findByTokenHash(randomHash());
+
+        assertThat(found).isEmpty();
+    }
+
+    @Test
+    void markAsUsedShouldTransitionActiveTokenToUsed() {
+        TokenFamily tokenFamily = createTokenFamily();
+        RefreshToken token = createRefreshToken(tokenFamily.getId(), "ACTIVE");
+
+        int rows = refreshTokenRepository.markAsUsed(token.getId());
+
+        assertThat(rows).isEqualTo(1);
+        RefreshToken updated = refreshTokenRepository.findById(token.getId()).orElseThrow();
+        assertThat(updated.getStatus()).isEqualTo("USED");
+        assertThat(updated.getUsedAt()).isNotNull();
+    }
+
+    @Test
+    void markAsUsedShouldReturnZeroForAlreadyUsedToken() {
+        TokenFamily tokenFamily = createTokenFamily();
+        RefreshToken token = createRefreshToken(tokenFamily.getId(), "ACTIVE");
+        refreshTokenRepository.markAsUsed(token.getId());
+
+        int rows = refreshTokenRepository.markAsUsed(token.getId());
+
+        assertThat(rows).isEqualTo(0);
+    }
+
+    @Test
+    void markAsUsedShouldReturnZeroForExpiredToken() {
+        TokenFamily tokenFamily = createTokenFamily();
+        RefreshToken token = new RefreshToken();
+        token.setTokenFamilyId(tokenFamily.getId());
+        token.setStatus("ACTIVE");
+        token.setExpiresAt(OffsetDateTime.now().minusHours(1));
+        token.setTokenHash(randomHash());
+        RefreshToken created = refreshTokenRepository.create(token);
+
+        int rows = refreshTokenRepository.markAsUsed(created.getId());
+
+        assertThat(rows).isEqualTo(0);
+    }
+
     private TokenFamily createTokenFamily() {
         User user = new User();
         user.setEmail("refreshtoken-" + UUID.randomUUID() + "@example.com");
@@ -140,10 +205,25 @@ class RefreshTokenRepositoryIT extends AbstractIntegrationTest {
     }
 
     private RefreshToken createRefreshToken(UUID tokenFamilyId, String status) {
+        return createRefreshTokenWithHash(tokenFamilyId, status, randomHash());
+    }
+
+    private RefreshToken createRefreshTokenWithHash(UUID tokenFamilyId, String status, byte[] hash) {
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setTokenFamilyId(tokenFamilyId);
         refreshToken.setStatus(status);
         refreshToken.setExpiresAt(OffsetDateTime.now().plusHours(1));
+        refreshToken.setTokenHash(hash);
         return refreshTokenRepository.create(refreshToken);
+    }
+
+    private byte[] randomHash() {
+        try {
+            byte[] bytes = new byte[32];
+            new java.security.SecureRandom().nextBytes(bytes);
+            return MessageDigest.getInstance("SHA-256").digest(bytes);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
