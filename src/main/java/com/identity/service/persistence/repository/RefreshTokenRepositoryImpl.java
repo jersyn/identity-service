@@ -6,6 +6,7 @@ import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,8 +32,14 @@ public class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
     public Optional<RefreshToken> findByTokenHash(byte[] tokenHash) {
         return dsl.selectFrom(REFRESH_TOKENS)
             .where(REFRESH_TOKENS.TOKEN_HASH.eq(tokenHash))
-            .and(REFRESH_TOKENS.STATUS.eq("ACTIVE"))
             .fetchOptional(this::toDomain);
+    }
+
+    @Override
+    public List<RefreshToken> findAllByTokenFamilyId(UUID tokenFamilyId) {
+        return dsl.selectFrom(REFRESH_TOKENS)
+            .where(REFRESH_TOKENS.TOKEN_FAMILY_ID.eq(tokenFamilyId))
+            .fetch(this::toDomain);
     }
 
     @Override
@@ -58,6 +65,15 @@ public class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
             .where(REFRESH_TOKENS.ID.eq(id))
             .and(REFRESH_TOKENS.STATUS.eq("ACTIVE"))
             .and(REFRESH_TOKENS.EXPIRES_AT.greaterThan(OffsetDateTime.now()))
+            .execute();
+    }
+
+    @Override
+    public int revokeActiveByFamilyId(UUID tokenFamilyId) {
+        return dsl.update(REFRESH_TOKENS)
+            .set(REFRESH_TOKENS.STATUS, "REVOKED")
+            .where(REFRESH_TOKENS.TOKEN_FAMILY_ID.eq(tokenFamilyId))
+            .and(REFRESH_TOKENS.STATUS.eq("ACTIVE"))
             .execute();
     }
 

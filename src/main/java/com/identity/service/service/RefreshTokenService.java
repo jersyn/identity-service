@@ -50,7 +50,7 @@ public class RefreshTokenService {
         this.jwtAccessTokenProperties = jwtAccessTokenProperties;
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = InvalidRefreshTokenException.class)
     public TokenExchangeResponse exchangeRefreshToken(String opaqueRefreshToken) {
         byte[] tokenBytes = HEX_FORMAT.parseHex(opaqueRefreshToken);
         byte[] tokenHash = sha256(tokenBytes);
@@ -58,8 +58,12 @@ public class RefreshTokenService {
         RefreshToken token = refreshTokenRepository.findByTokenHash(tokenHash)
             .orElseThrow(() -> new InvalidRefreshTokenException("invalid refresh token"));
 
-        int rows = refreshTokenRepository.markAsUsed(token.getId());
-        if (rows == 0) {
+        if (!"ACTIVE".equals(token.getStatus())) {
+            revokeFamily(token.getTokenFamilyId());
+            throw new InvalidRefreshTokenException("invalid refresh token");
+        }
+
+        if (token.getExpiresAt() == null || !token.getExpiresAt().isAfter(OffsetDateTime.now())) {
             throw new InvalidRefreshTokenException("invalid refresh token");
         }
 
@@ -67,6 +71,11 @@ public class RefreshTokenService {
             .orElseThrow(() -> new InvalidRefreshTokenException("invalid refresh token"));
 
         if (!"ACTIVE".equals(family.getStatus())) {
+            throw new InvalidRefreshTokenException("invalid refresh token");
+        }
+
+        int rows = refreshTokenRepository.markAsUsed(token.getId());
+        if (rows == 0) {
             throw new InvalidRefreshTokenException("invalid refresh token");
         }
 
@@ -83,6 +92,11 @@ public class RefreshTokenService {
         long expiresIn = jwtAccessTokenProperties.lifetime().getSeconds();
 
         return new TokenExchangeResponse(accessToken, newOpaqueToken.value, expiresIn);
+    }
+
+    private void revokeFamily(UUID familyId) {
+        tokenFamilyRepository.revoke(familyId);
+        refreshTokenRepository.revokeActiveByFamilyId(familyId);
     }
 
     private OpaqueToken generateOpaqueToken() {

@@ -10,4 +10,6 @@ public interface TokenFamilyRepository {
     Optional<TokenFamily> findById(UUID id);
 
     TokenFamily create(TokenFamily tokenFamily);
+
+    int revoke(UUID id);
 }

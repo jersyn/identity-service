@@ -92,6 +92,33 @@ class TokenFamilyRepositoryIT extends AbstractIntegrationTest {
         assertThat(family2.getUserId()).isEqualTo(user.getId());
     }
 
+    @Test
+    void revokeShouldTransitionActiveFamilyToRevoked() {
+        User user = createUser();
+        TokenFamily tokenFamily = createTokenFamily(user.getId(), "ACTIVE");
+
+        int rows = tokenFamilyRepository.revoke(tokenFamily.getId());
+
+        assertThat(rows).isEqualTo(1);
+        TokenFamily revoked = tokenFamilyRepository.findById(tokenFamily.getId()).orElseThrow();
+        assertThat(revoked.getStatus()).isEqualTo("REVOKED");
+        assertThat(revoked.getRevokedAt()).isNotNull();
+    }
+
+    @Test
+    void revokeShouldReturnZeroForAlreadyRevokedFamily() {
+        User user = createUser();
+        TokenFamily tokenFamily = createTokenFamily(user.getId(), "ACTIVE");
+        tokenFamilyRepository.revoke(tokenFamily.getId());
+
+        assertThat(tokenFamilyRepository.revoke(tokenFamily.getId())).isZero();
+    }
+
+    @Test
+    void revokeShouldReturnZeroForNonexistentId() {
+        assertThat(tokenFamilyRepository.revoke(UUID.randomUUID())).isZero();
+    }
+
     private User createUser() {
         User user = new User();
         user.setEmail("tokenfamily-" + UUID.randomUUID() + "@example.com");

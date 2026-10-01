@@ -154,6 +154,65 @@ class RefreshTokenRepositoryIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void findByTokenHashShouldReturnConsumedToken() {
+        TokenFamily tokenFamily = createTokenFamily();
+        byte[] hash = randomHash();
+        RefreshToken token = createRefreshTokenWithHash(tokenFamily.getId(), "ACTIVE", hash);
+        refreshTokenRepository.markAsUsed(token.getId());
+
+        Optional<RefreshToken> found = refreshTokenRepository.findByTokenHash(hash);
+
+        assertThat(found).isPresent();
+        assertThat(found.get().getStatus()).isEqualTo("USED");
+    }
+
+    @Test
+    void findAllByTokenFamilyIdShouldReturnAllTokensInFamily() {
+        TokenFamily tokenFamily = createTokenFamily();
+        createRefreshToken(tokenFamily.getId(), "ACTIVE");
+        createRefreshToken(tokenFamily.getId(), "USED");
+
+        TokenFamily otherFamily = createTokenFamily();
+        createRefreshToken(otherFamily.getId(), "ACTIVE");
+
+        assertThat(refreshTokenRepository.findAllByTokenFamilyId(tokenFamily.getId()))
+            .hasSize(2);
+    }
+
+    @Test
+    void findAllByTokenFamilyIdShouldReturnEmptyForUnknownFamily() {
+        assertThat(refreshTokenRepository.findAllByTokenFamilyId(UUID.randomUUID())).isEmpty();
+    }
+
+    @Test
+    void revokeActiveByFamilyIdShouldRevokeOnlyActiveTokens() {
+        TokenFamily tokenFamily = createTokenFamily();
+        RefreshToken activeToken = createRefreshToken(tokenFamily.getId(), "ACTIVE");
+        RefreshToken usedToken = createRefreshToken(tokenFamily.getId(), "USED");
+
+        int rows = refreshTokenRepository.revokeActiveByFamilyId(tokenFamily.getId());
+
+        assertThat(rows).isEqualTo(1);
+        assertThat(refreshTokenRepository.findById(activeToken.getId()).orElseThrow().getStatus())
+            .isEqualTo("REVOKED");
+        assertThat(refreshTokenRepository.findById(usedToken.getId()).orElseThrow().getStatus())
+            .isEqualTo("USED");
+    }
+
+    @Test
+    void revokeActiveByFamilyIdShouldReturnZeroWhenNothingActive() {
+        TokenFamily tokenFamily = createTokenFamily();
+        createRefreshToken(tokenFamily.getId(), "USED");
+
+        assertThat(refreshTokenRepository.revokeActiveByFamilyId(tokenFamily.getId())).isZero();
+    }
+
+    @Test
+    void revokeActiveByFamilyIdShouldReturnZeroForUnknownFamily() {
+        assertThat(refreshTokenRepository.revokeActiveByFamilyId(UUID.randomUUID())).isZero();
+    }
+
+    @Test
     void markAsUsedShouldTransitionActiveTokenToUsed() {
         TokenFamily tokenFamily = createTokenFamily();
         RefreshToken token = createRefreshToken(tokenFamily.getId(), "ACTIVE");

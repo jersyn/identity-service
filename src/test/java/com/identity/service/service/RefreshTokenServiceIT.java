@@ -52,7 +52,9 @@ class RefreshTokenServiceIT extends AbstractIntegrationTest {
         assertThat(response.expiresIn()).isEqualTo(900);
         assertThat(response.refreshToken()).isNotEqualTo(HEX.formatHex(tokenBytes));
 
-        assertThat(refreshTokenRepository.findByTokenHash(tokenHash)).isEmpty();
+        RefreshToken consumed = refreshTokenRepository.findByTokenHash(tokenHash).orElseThrow();
+        assertThat(consumed.getStatus()).isEqualTo("USED");
+        assertThat(consumed.getUsedAt()).isNotNull();
     }
 
     @Test
@@ -67,6 +69,40 @@ class RefreshTokenServiceIT extends AbstractIntegrationTest {
         assertThatThrownBy(() -> refreshTokenService.exchangeRefreshToken(
             HEX.formatHex(tokenBytes)))
             .isInstanceOf(InvalidRefreshTokenException.class);
+
+        TokenFamily revoked = tokenFamilyRepository.findById(family.getId()).orElseThrow();
+        assertThat(revoked.getStatus()).isEqualTo("REVOKED");
+        assertThat(revoked.getRevokedAt()).isNotNull();
+    }
+
+    @Test
+    void replayShouldRevokeFamilyAndBlockSubsequentRefreshes() {
+        User user = createUser();
+        TokenFamily family = createFamily(user.getId());
+        byte[] originalBytes = randomBytes();
+        createActiveToken(family.getId(), sha256(originalBytes));
+
+        TokenExchangeResponse rotation = refreshTokenService.exchangeRefreshToken(
+            HEX.formatHex(originalBytes));
+
+        assertThatThrownBy(() -> refreshTokenService.exchangeRefreshToken(
+            HEX.formatHex(originalBytes)))
+            .isInstanceOf(InvalidRefreshTokenException.class);
+
+        TokenFamily revoked = tokenFamilyRepository.findById(family.getId()).orElseThrow();
+        assertThat(revoked.getStatus()).isEqualTo("REVOKED");
+        assertThat(revoked.getRevokedAt()).isNotNull();
+
+        var tokensAfterReuse = refreshTokenRepository.findAllByTokenFamilyId(family.getId());
+        assertThat(tokensAfterReuse).isNotEmpty();
+        assertThat(tokensAfterReuse).noneMatch(t -> "ACTIVE".equals(t.getStatus()));
+
+        assertThatThrownBy(() -> refreshTokenService.exchangeRefreshToken(
+            rotation.refreshToken()))
+            .isInstanceOf(InvalidRefreshTokenException.class);
+
+        assertThat(refreshTokenRepository.findAllByTokenFamilyId(family.getId()))
+            .hasSameSizeAs(tokensAfterReuse);
     }
 
     @Test
@@ -86,6 +122,9 @@ class RefreshTokenServiceIT extends AbstractIntegrationTest {
         assertThatThrownBy(() -> refreshTokenService.exchangeRefreshToken(
             HEX.formatHex(tokenBytes)))
             .isInstanceOf(InvalidRefreshTokenException.class);
+
+        assertThat(tokenFamilyRepository.findById(family.getId()).orElseThrow().getStatus())
+            .isEqualTo("ACTIVE");
     }
 
     @Test

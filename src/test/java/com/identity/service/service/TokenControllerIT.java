@@ -150,11 +150,29 @@ class TokenControllerIT extends AbstractIntegrationTest {
         assertThat(successCount).isEqualTo(1);
         assertThat(failureCount).isEqualTo(1);
 
-        assertThat(refreshTokenRepository.findByTokenHash(tokenHash)).isEmpty();
-
-        assertThat(refreshTokenRepository.findById(token.getId())).isPresent();
+        RefreshToken original = refreshTokenRepository.findById(token.getId()).orElseThrow();
+        assertThat(original.getStatus()).isEqualTo("USED");
 
         executor.shutdown();
+    }
+
+    @Test
+    void replayingConsumedRefreshTokenShouldReturn400AndRevokeFamily() {
+        byte[] tokenBytes = randomBytes();
+        byte[] tokenHash = sha256(tokenBytes);
+        RefreshToken token = setupToken(tokenHash);
+        String originalToken = HEX.formatHex(tokenBytes);
+
+        ResponseEntity<Map> firstResponse = exchangeToken(originalToken);
+        assertThat(firstResponse.getStatusCode().is2xxSuccessful()).isTrue();
+
+        ResponseEntity<Map> replayResponse = exchangeToken(originalToken);
+        assertThat(replayResponse.getStatusCode().value()).isEqualTo(400);
+        assertThat(replayResponse.getBody()).containsEntry("error", "invalid_refresh_token");
+
+        TokenFamily family = tokenFamilyRepository.findById(token.getTokenFamilyId()).orElseThrow();
+        assertThat(family.getStatus()).isEqualTo("REVOKED");
+        assertThat(family.getRevokedAt()).isNotNull();
     }
 
     @SuppressWarnings("unchecked")

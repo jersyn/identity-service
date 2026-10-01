@@ -121,10 +121,12 @@ class RefreshTokenServiceTest {
             .isInstanceOf(InvalidRefreshTokenException.class);
 
         verify(refreshTokenRepository, never()).markAsUsed(any());
+        verify(tokenFamilyRepository, never()).revoke(any());
+        verify(refreshTokenRepository, never()).revokeActiveByFamilyId(any());
     }
 
     @Test
-    void exchangeShouldThrowOnAlreadyUsedToken() {
+    void exchangeShouldRevokeFamilyOnAlreadyUsedToken() {
         UUID familyId = UUID.randomUUID();
         byte[] tokenBytes = randomBytes();
         byte[] tokenHash = sha256(tokenBytes);
@@ -134,17 +136,40 @@ class RefreshTokenServiceTest {
             OffsetDateTime.now().plusHours(1), OffsetDateTime.now(), tokenHash);
         when(refreshTokenRepository.findByTokenHash(tokenHash))
             .thenReturn(Optional.of(usedToken));
-        when(refreshTokenRepository.markAsUsed(usedToken.getId())).thenReturn(0);
 
         assertThatThrownBy(() -> refreshTokenService.exchangeRefreshToken(
             HEX.formatHex(tokenBytes)))
             .isInstanceOf(InvalidRefreshTokenException.class);
 
-        verify(tokenFamilyRepository, never()).findById(any());
+        verify(tokenFamilyRepository).revoke(familyId);
+        verify(refreshTokenRepository).revokeActiveByFamilyId(familyId);
+        verify(refreshTokenRepository, never()).markAsUsed(any());
+        verify(refreshTokenRepository, never()).create(any());
     }
 
     @Test
-    void exchangeShouldThrowOnExpiredToken() {
+    void exchangeShouldRevokeFamilyOnRevokedToken() {
+        UUID familyId = UUID.randomUUID();
+        byte[] tokenBytes = randomBytes();
+        byte[] tokenHash = sha256(tokenBytes);
+
+        RefreshToken revokedToken = new RefreshToken(
+            UUID.randomUUID(), familyId, "REVOKED",
+            OffsetDateTime.now().plusHours(1), null, tokenHash);
+        when(refreshTokenRepository.findByTokenHash(tokenHash))
+            .thenReturn(Optional.of(revokedToken));
+
+        assertThatThrownBy(() -> refreshTokenService.exchangeRefreshToken(
+            HEX.formatHex(tokenBytes)))
+            .isInstanceOf(InvalidRefreshTokenException.class);
+
+        verify(tokenFamilyRepository).revoke(familyId);
+        verify(refreshTokenRepository).revokeActiveByFamilyId(familyId);
+        verify(refreshTokenRepository, never()).create(any());
+    }
+
+    @Test
+    void exchangeShouldThrowOnExpiredTokenWithoutRevokingFamily() {
         UUID familyId = UUID.randomUUID();
         byte[] tokenBytes = randomBytes();
         byte[] tokenHash = sha256(tokenBytes);
@@ -154,11 +179,14 @@ class RefreshTokenServiceTest {
             OffsetDateTime.now().minusHours(1), null, tokenHash);
         when(refreshTokenRepository.findByTokenHash(tokenHash))
             .thenReturn(Optional.of(expiredToken));
-        when(refreshTokenRepository.markAsUsed(expiredToken.getId())).thenReturn(0);
 
         assertThatThrownBy(() -> refreshTokenService.exchangeRefreshToken(
             HEX.formatHex(tokenBytes)))
             .isInstanceOf(InvalidRefreshTokenException.class);
+
+        verify(tokenFamilyRepository, never()).revoke(any());
+        verify(refreshTokenRepository, never()).revokeActiveByFamilyId(any());
+        verify(refreshTokenRepository, never()).markAsUsed(any());
     }
 
     @Test
@@ -172,7 +200,6 @@ class RefreshTokenServiceTest {
             OffsetDateTime.now().plusHours(1), null, tokenHash);
         when(refreshTokenRepository.findByTokenHash(tokenHash))
             .thenReturn(Optional.of(token));
-        when(refreshTokenRepository.markAsUsed(token.getId())).thenReturn(1);
 
         TokenFamily revokedFamily = new TokenFamily(
             familyId, UUID.randomUUID(), "REVOKED",
@@ -184,6 +211,7 @@ class RefreshTokenServiceTest {
             HEX.formatHex(tokenBytes)))
             .isInstanceOf(InvalidRefreshTokenException.class);
 
+        verify(refreshTokenRepository, never()).markAsUsed(any());
         verify(refreshTokenRepository, never()).create(any());
     }
 
@@ -198,12 +226,13 @@ class RefreshTokenServiceTest {
             OffsetDateTime.now().plusHours(1), null, tokenHash);
         when(refreshTokenRepository.findByTokenHash(tokenHash))
             .thenReturn(Optional.of(token));
-        when(refreshTokenRepository.markAsUsed(token.getId())).thenReturn(1);
         when(tokenFamilyRepository.findById(familyId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> refreshTokenService.exchangeRefreshToken(
             HEX.formatHex(tokenBytes)))
             .isInstanceOf(InvalidRefreshTokenException.class);
+
+        verify(refreshTokenRepository, never()).markAsUsed(any());
     }
 
     @Test

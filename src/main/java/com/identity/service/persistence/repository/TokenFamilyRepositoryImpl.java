@@ -5,6 +5,7 @@ import com.identity.service.persistence.generated.tables.records.TokenFamiliesRe
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -37,6 +38,16 @@ public class TokenFamilyRepositoryImpl implements TokenFamilyRepository {
         record.refresh();
 
         return toDomain(record);
+    }
+
+    @Override
+    public int revoke(UUID id) {
+        return dsl.update(TOKEN_FAMILIES)
+            .set(TOKEN_FAMILIES.STATUS, "REVOKED")
+            .set(TOKEN_FAMILIES.REVOKED_AT, OffsetDateTime.now())
+            .where(TOKEN_FAMILIES.ID.eq(id))
+            .and(TOKEN_FAMILIES.STATUS.eq("ACTIVE"))
+            .execute();
     }
 
     private TokenFamily toDomain(TokenFamiliesRecord record) {
