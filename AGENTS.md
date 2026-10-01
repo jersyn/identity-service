@@ -16,7 +16,7 @@ Docker is **required** for integration tests — Testcontainers spins up Postgre
 
 ## Architecture
 
-- **Spring Boot 4.0.7** on **Java 21** (`com.identity.service`)
+- **Spring Boot 3.5.16** on **Java 21** (`com.identity.service`)
 - **Persistence**: jOOQ codegen + Spring JDBC. Generated code lives in `persistence/generated/` — do not edit manually.
 - **Migrations**: Flyway in `src/main/resources/db/migration/`. New tables must be added as numbered migration files.
 - **jOOQ codegen** runs against the **local external** PostgreSQL (`localhost:15432`) at `generate-sources` phase. It regenerates `persistence/generated/` classes.
